@@ -50,7 +50,7 @@ const getNewExpression = (expression, operator) => {
 }
 
 const getResult = expression => {
-    let newExp = '';
+    let newExp = expression;
     if (expression.includes('^')) {
         newExp = getNewExpression(expression, '^');
     } else if (expression.includes('*')) {
@@ -127,20 +127,34 @@ operators.forEach(element => {
         });
     } else if (element.dataset.operator === 'pow2') {
         element.addEventListener('click', () => {
-            if (expression.textContent.length > 0) { // because first char must be numeric
-                // code
-                console.log('კვადრატში აყვანილი');
+            let finalExpression = expression.textContent;
+            let finalChar = finalExpression.charAt(finalExpression.length - 1);
+            if (!isFinite(finalChar) && finalChar != ')') {
+                expression.textContent = expression.textContent.slice(0, -1);
+                finalExpression = finalExpression.slice(0, -1);
             }
+            expression.textContent = '';
+            let pow2 = getResult(finalExpression);
+            input.textContent = Math.pow(pow2, 2);
+            isFinalResult = true;
         });
     } else if (element.dataset.operator === 'powx') {
         element.addEventListener('click', () => {
-
             expression.textContent += '^';
             input.textContent = '';
         });
     } else if (element.dataset.operator === 'sqrt') {
         element.addEventListener('click', () => {
-            console.log('კვადრატული ფესვი');
+            let finalExpression = expression.textContent;
+            let finalChar = finalExpression.charAt(finalExpression.length - 1);
+            if (!isFinite(finalChar) && finalChar != ')') {
+                expression.textContent = expression.textContent.slice(0, -1);
+                finalExpression = finalExpression.slice(0, -1);
+            }
+            expression.textContent = '';
+            let pow2 = getResult(finalExpression);
+            input.textContent = Math.pow(pow2, 1 / 2);
+            isFinalResult = true;
         });
     } else if (element.dataset.operator === 'equals') {
         element.addEventListener('click', () => {
