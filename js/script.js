@@ -18,7 +18,8 @@ const getNewExpression = (expression, operator) => {
     } else if (operator === '+') {
         index = expression.indexOf('+');
     } else if (operator === '-') {
-        index = expression.indexOf('-');
+        let tempStr = expression.replaceAll('(-', '('); // not select negative sign
+        index = tempStr.indexOf('-');
     }
 
     let firstHalf = expression.substring(0, index);
