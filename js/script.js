@@ -17,11 +17,39 @@ const getResult = expression => {
         let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
         newExp = expression.replace(firstOperand + '^' + secondOperand, Math.pow(firstOperand, secondOperand));
 
+    } else if (expression.includes('*')) {
+        let index = expression.indexOf('*');
+        let firstHalf = expression.substring(0, index);
+        let secondHalf = expression.substring(index + 1, expression.length);
+        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
+        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+        newExp = expression.replace(firstOperand + '*' + secondOperand, Number(firstOperand) * Number(secondOperand));
+    } else if (expression.includes('/')) {
+        let index = expression.indexOf('/');
+        let firstHalf = expression.substring(0, index);
+        let secondHalf = expression.substring(index + 1, expression.length);
+        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
+        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+        newExp = expression.replace(firstOperand + '/' + secondOperand, Number(firstOperand) / Number(secondOperand));
+    } else if (expression.includes('+')) {
+        let index = expression.indexOf('+');
+        let firstHalf = expression.substring(0, index);
+        let secondHalf = expression.substring(index + 1, expression.length);
+        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
+        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+        newExp = expression.replace(firstOperand + '+' + secondOperand, Number(firstOperand) + Number(secondOperand));
+    } else if (expression.includes('-')) {
+        let index = expression.indexOf('-');
+        let firstHalf = expression.substring(0, index);
+        let secondHalf = expression.substring(index + 1, expression.length);
+        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
+        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+        newExp = expression.replace(firstOperand + '-' + secondOperand, Number(firstOperand) - Number(secondOperand));
     }
     if (isFinite(newExp)) {
         return newExp;
     } else {
-        return result(newExp);
+        return getResult(newExp);
     }
 }
 
@@ -115,10 +143,20 @@ operators.forEach(element => {
             if (expression.textContent.length > 0) { // because first char must be numeric
                 let str = expression.textContent;
                 let finalChar = str.charAt(str.length - 1)
-                if (isFinite(finalChar) || finalChar === ')') {
-                    expression.textContent += element.textContent;
+                let operator = '';
+                if (element.dataset.operator === 'multiplication') {
+                    operator = '*';
+                } else if (element.dataset.operator === 'divide') {
+                    operator = '/';
+                } else if (element.dataset.operator === 'minus') {
+                    operator = '-';
                 } else {
-                    expression.textContent = expression.textContent.slice(0, -1) + element.textContent;
+                    operator = element.textContent;
+                }
+                if (isFinite(finalChar) || finalChar === ')') {
+                    expression.textContent += operator;
+                } else {
+                    expression.textContent = expression.textContent.slice(0, -1) + operator;
                 }
                 input.textContent = '';
             }
