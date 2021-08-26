@@ -79,3 +79,7 @@ body {
 .equals {
     grid-column: 3 / 5;
 }
+
+.sup-x {
+    font-size: 10px;
+}

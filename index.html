@@ -12,13 +12,18 @@
 <body>
     <main class="main">
         <section id="display">
-            <span>5 + 12 =</span>
-            <span>17</span>
+            <span id="expression"></span>
+            <span id="input"></span>
         </section>
         <section id="keypad">
+            <button class="button" data-clear="clear-all">C</button>
+            <button class="button" data-clear="clear">CE</button>
+            <button class="button" data-clear="backspace">&larr;</button>            
             <button class="button" data-operator="percent">&percnt;</button>
-            <button class="button" data-clear="clear">C</button>
-            <button class="button" data-clear="backspace">&larr;</button>
+
+            <button class="button" data-operator="pow2">x <sup class="sup-x">2</sup></button>
+            <button class="button" data-operator="powx">x <sup class="sup-x">y</sup></button>
+            <button class="button" data-operator="sqrt">&radic;</button>
             <button class="button" data-operator="divide">&#8725;</button>
 
             <button class="button" data-number="7">7</button>
