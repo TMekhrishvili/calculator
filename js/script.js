@@ -5,25 +5,33 @@ const numbers = document.querySelectorAll("[data-number]");
 const operators = document.querySelectorAll("[data-operator]");
 const clears = document.querySelectorAll("[data-clear]");
 
+let isFinalResult = false;
+
 const getResult = expression => {
-    if (isFinite(expression)) {
-        console.log('მოვიდა');
-        return expression;
+    let newExp = '';
+    if (expression.includes('^')) {
+        let index = expression.indexOf('^');
+        let firstHalf = expression.substring(0, index);
+        let secondHalf = expression.substring(index + 1, expression.length);
+        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
+        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+        newExp = expression.replace(firstOperand + '^' + secondOperand, Math.pow(firstOperand, secondOperand));
+
+    }
+    if (isFinite(newExp)) {
+        return newExp;
     } else {
-        if (expression.includes('^')) {
-            let index = expression.indexOf('^');
-            let firstHalf = expression.substring(0, index);
-            let secondHalf = expression.substring(index + 1, expression.length);
-            let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
-            let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
-            let newExp = expression.replace(firstOperand + '^' + secondOperand, Math.pow(firstOperand, secondOperand));
-            getResult(newExp);
-        }
+        return result(newExp);
     }
 }
 
 numbers.forEach(element => {
     element.addEventListener('click', () => {
+        if (isFinalResult) {
+            input.textContent = '';
+            expression.textContent = '';
+            isFinalResult = false;
+        }
         if (element.dataset.number === 'dot') {
             if (input.textContent === '') {
                 input.textContent = '0' + element.textContent;
@@ -41,6 +49,7 @@ numbers.forEach(element => {
                 expression.textContent = expression.textContent.replace(re, num);
             } else {
                 let re = new RegExp(input.textContent + '$');
+
                 expression.textContent = expression.textContent.replace(re, '(' + -1 * Number(input.textContent) + ')');
             }
             input.textContent = -1 * Number(input.textContent);
@@ -61,6 +70,11 @@ numbers.forEach(element => {
 });
 
 operators.forEach(element => {
+    if (isFinalResult) {
+        input.textContent = '';
+        expression.textContent = '';
+        isFinalResult = false;
+    }
     if (element.dataset.operator === 'percent') {
         element.addEventListener('click', () => {
             let re = new RegExp(input.textContent + '$');
@@ -69,11 +83,14 @@ operators.forEach(element => {
         });
     } else if (element.dataset.operator === 'pow2') {
         element.addEventListener('click', () => {
-
-            console.log('კვადრატში აყვანილი');
+            if (expression.textContent.length > 0) { // because first char must be numeric
+                // code
+                console.log('კვადრატში აყვანილი');
+            }
         });
     } else if (element.dataset.operator === 'powx') {
         element.addEventListener('click', () => {
+
             expression.textContent += '^';
             input.textContent = '';
         });
@@ -89,8 +106,9 @@ operators.forEach(element => {
                 expression.textContent = expression.textContent.slice(0, -1);
                 finalExpression = finalExpression.slice(0, -1);
             }
-            let result = getResult(finalExpression);
-            console.log(result);
+            expression.textContent = '';
+            input.textContent = getResult(finalExpression);
+            isFinalResult = true;
         });
     } else {
         element.addEventListener('click', () => {
