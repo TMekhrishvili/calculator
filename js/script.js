@@ -7,15 +7,48 @@ const clears = document.querySelectorAll("[data-clear]");
 
 numbers.forEach(element => {
     element.addEventListener('click', () => {
-        input.textContent += element.textContent;
-        expression.textContent += element.textContent;
+        if (element.dataset.number === 'dot') {
+            if (input.textContent === '') {
+                input.textContent = '0' + element.textContent;
+                expression.textContent += '0' + element.textContent;
+            } else if (input.textContent.includes('.')) {
+
+            } else {
+                input.textContent += element.textContent;
+                expression.textContent += element.textContent;
+            }
+        } else if (element.dataset.number === 'plusminus') {
+            if (Number(input.textContent) < 0) {
+                let re = new RegExp('\\(' + input.textContent + '\\)$');
+                let num = -1 * Number(input.textContent);
+                expression.textContent = expression.textContent.replace(re, num);
+            } else {
+                let re = new RegExp(input.textContent + '$');
+                expression.textContent = expression.textContent.replace(re, '(' + -1 * Number(input.textContent) + ')');
+            }
+            input.textContent = -1 * Number(input.textContent);
+        } else {
+            if (Number(input.textContent) === 0 && !input.textContent.includes('.')) {
+                input.textContent = element.textContent;
+                expression.textContent = expression.textContent.replace(/0+$/, '') + element.textContent;
+            } else {
+                input.textContent += element.textContent;
+                if (Number(input.textContent) < 0) {
+                    expression.textContent = expression.textContent.slice(0, -1) + element.textContent + ')';
+                } else {
+                    expression.textContent += element.textContent;
+                }
+            }
+        }
     });
 });
 
 operators.forEach(element => {
     if (element.dataset.operator === 'percent') {
         element.addEventListener('click', () => {
-            console.log('100-ზე გაყოფილი');
+            let re = new RegExp(input.textContent + '$');
+            expression.textContent = expression.textContent.replace(re, Number(input.textContent) / 100);
+            input.textContent = '';
         });
     } else if (element.dataset.operator === 'pow2') {
         element.addEventListener('click', () => {
@@ -28,18 +61,19 @@ operators.forEach(element => {
     } else if (element.dataset.operator === 'equals') {
         element.addEventListener('click', () => {
             let finalExpression = expression.textContent;
-            if (!isFinite(finalExpression.charAt(finalExpression.length - 1))) {
+            let finalChar = finalExpression.charAt(finalExpression.length - 1);
+            if (!isFinite(finalChar) && finalChar != ')') {
                 expression.textContent = expression.textContent.slice(0, -1);
                 finalExpression = finalExpression.slice(0, -1);
             }
-            // input.textContent = eval(finalExpression);
-            console.log('დაიანგარიშოს შედეგი');
+            input.textContent = getResult(finalExpression);
         });
     } else {
         element.addEventListener('click', () => {
             if (expression.textContent.length > 0) { // because first char must be numeric
                 let str = expression.textContent;
-                if (isFinite(str.charAt(str.length - 1))) {
+                let finalChar = str.charAt(str.length - 1)
+                if (isFinite(finalChar) || finalChar === ')') {
                     expression.textContent += element.textContent;
                 } else {
                     expression.textContent = expression.textContent.slice(0, -1) + element.textContent;
@@ -68,3 +102,8 @@ clears.forEach(element => {
         });
     }
 });
+
+const getResult = expression => {
+    let result = 5;
+    return result;
+}
