@@ -59,9 +59,9 @@ const getResult = expression => {
         newExp = getNewExpression(expression, '*');
     } else if (expression.includes('/')) {
         newExp = getNewExpression(expression, '/');
-    } else if (expression.includes('-')) {
+    } else if (tempExpression.includes('-')) {
         newExp = getNewExpression(expression, '-');
-    } else if (tempExpression.includes('+')) {
+    } else if (expression.includes('+')) {
         newExp = getNewExpression(expression, '+');
     } else {
         newExp = expression.replace('(', '').replace(')', '');
