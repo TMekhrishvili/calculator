@@ -52,6 +52,7 @@ const getNewExpression = (expression, operator) => {
 
 const getResult = expression => {
     let newExp = expression;
+    let tempExpression = expression.replaceAll('(-', '(');
     if (expression.includes('^')) {
         newExp = getNewExpression(expression, '^');
     } else if (expression.includes('*')) {
@@ -60,8 +61,10 @@ const getResult = expression => {
         newExp = getNewExpression(expression, '/');
     } else if (expression.includes('+')) {
         newExp = getNewExpression(expression, '+');
-    } else if (expression.includes('-')) {
+    } else if (tempExpression.includes('-')) {
         newExp = getNewExpression(expression, '-');
+    } else {
+        newExp = expression.replace('(', '').replace(')', '');
     }
     if (isFinite(newExp)) {
         return newExp;
@@ -153,8 +156,8 @@ operators.forEach(element => {
                 finalExpression = finalExpression.slice(0, -1);
             }
             expression.textContent = '';
-            let pow2 = getResult(finalExpression);
-            input.textContent = Math.pow(pow2, 1 / 2);
+            let sqrt = getResult(finalExpression);
+            input.textContent = Number(sqrt) < 0 ? 'Error' : Math.pow(sqrt, 1 / 2);
             isFinalResult = true;
         });
     } else if (element.dataset.operator === 'equals') {
