@@ -5,6 +5,23 @@ const numbers = document.querySelectorAll("[data-number]");
 const operators = document.querySelectorAll("[data-operator]");
 const clears = document.querySelectorAll("[data-clear]");
 
+const getResult = expression => {
+    if (isFinite(expression)) {
+        console.log('მოვიდა');
+        return expression;
+    } else {
+        if (expression.includes('^')) {
+            let index = expression.indexOf('^');
+            let firstHalf = expression.substring(0, index);
+            let secondHalf = expression.substring(index + 1, expression.length);
+            let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
+            let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+            let newExp = expression.replace(firstOperand + '^' + secondOperand, Math.pow(firstOperand, secondOperand));
+            getResult(newExp);
+        }
+    }
+}
+
 numbers.forEach(element => {
     element.addEventListener('click', () => {
         if (element.dataset.number === 'dot') {
@@ -52,7 +69,13 @@ operators.forEach(element => {
         });
     } else if (element.dataset.operator === 'pow2') {
         element.addEventListener('click', () => {
+
             console.log('კვადრატში აყვანილი');
+        });
+    } else if (element.dataset.operator === 'powx') {
+        element.addEventListener('click', () => {
+            expression.textContent += '^';
+            input.textContent = '';
         });
     } else if (element.dataset.operator === 'sqrt') {
         element.addEventListener('click', () => {
@@ -66,7 +89,8 @@ operators.forEach(element => {
                 expression.textContent = expression.textContent.slice(0, -1);
                 finalExpression = finalExpression.slice(0, -1);
             }
-            input.textContent = getResult(finalExpression);
+            let result = getResult(finalExpression);
+            console.log(result);
         });
     } else {
         element.addEventListener('click', () => {
@@ -102,8 +126,3 @@ clears.forEach(element => {
         });
     }
 });
-
-const getResult = expression => {
-    let result = 5;
-    return result;
-}
