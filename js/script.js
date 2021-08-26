@@ -7,44 +7,60 @@ const clears = document.querySelectorAll("[data-clear]");
 
 let isFinalResult = false;
 
+const getNewExpression = (expression, operator) => {
+    let index = '';
+    if (operator === '^') {
+        index = expression.indexOf('^');
+    } else if (operator === '*') {
+        index = expression.indexOf('*');
+    } else if (operator === '/') {
+        index = expression.indexOf('/');
+    } else if (operator === '+') {
+        index = expression.indexOf('+');
+    } else if (operator === '-') {
+        index = expression.indexOf('-');
+    }
+
+    let firstHalf = expression.substring(0, index);
+    let secondHalf = expression.substring(index + 1, expression.length);
+    firstHalf = firstHalf.charAt(firstHalf.length - 1) === ')' ? firstHalf.slice(0, -1) : firstHalf;
+    let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
+    let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+    let firstOperandStr = Number(firstOperand) > 0 ? firstOperand : '(' + firstOperand + ')';
+    let secondOperandStr = Number(secondOperand) > 0 ? secondOperand : '(' + secondOperand + ')';
+    let re = '';
+
+    if (operator === '^') {
+        re = firstOperandStr + '^' + secondOperandStr;
+        return expression.replace(re, Math.pow(firstOperand, secondOperand));
+    } else if (operator === '*') {
+        re = firstOperandStr + '*' + secondOperandStr;
+        return expression.replace(re, Number(firstOperand) * Number(secondOperand));
+    } else if (operator === '/') {
+        re = firstOperandStr + '/' + secondOperandStr;
+        return expression.replace(re, Number(firstOperand) / Number(secondOperand));
+    } else if (operator === '+') {
+        re = firstOperandStr + '+' + secondOperandStr;
+        return expression.replace(re, Number(firstOperand) + Number(secondOperand));
+    } else if (operator === '-') {
+        re = firstOperandStr + '-' + secondOperandStr;
+        return expression.replace(re, Number(firstOperand) - Number(secondOperand));
+    }
+
+}
+
 const getResult = expression => {
     let newExp = '';
     if (expression.includes('^')) {
-        let index = expression.indexOf('^');
-        let firstHalf = expression.substring(0, index);
-        let secondHalf = expression.substring(index + 1, expression.length);
-        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
-        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
-        newExp = expression.replace(firstOperand + '^' + secondOperand, Math.pow(firstOperand, secondOperand));
-
+        newExp = getNewExpression(expression, '^');
     } else if (expression.includes('*')) {
-        let index = expression.indexOf('*');
-        let firstHalf = expression.substring(0, index);
-        let secondHalf = expression.substring(index + 1, expression.length);
-        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
-        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
-        newExp = expression.replace(firstOperand + '*' + secondOperand, Number(firstOperand) * Number(secondOperand));
+        newExp = getNewExpression(expression, '*');
     } else if (expression.includes('/')) {
-        let index = expression.indexOf('/');
-        let firstHalf = expression.substring(0, index);
-        let secondHalf = expression.substring(index + 1, expression.length);
-        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
-        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
-        newExp = expression.replace(firstOperand + '/' + secondOperand, Number(firstOperand) / Number(secondOperand));
+        newExp = getNewExpression(expression, '/');
     } else if (expression.includes('+')) {
-        let index = expression.indexOf('+');
-        let firstHalf = expression.substring(0, index);
-        let secondHalf = expression.substring(index + 1, expression.length);
-        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
-        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
-        newExp = expression.replace(firstOperand + '+' + secondOperand, Number(firstOperand) + Number(secondOperand));
+        newExp = getNewExpression(expression, '+');
     } else if (expression.includes('-')) {
-        let index = expression.indexOf('-');
-        let firstHalf = expression.substring(0, index);
-        let secondHalf = expression.substring(index + 1, expression.length);
-        let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
-        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
-        newExp = expression.replace(firstOperand + '-' + secondOperand, Number(firstOperand) - Number(secondOperand));
+        newExp = getNewExpression(expression, '-');
     }
     if (isFinite(newExp)) {
         return newExp;
@@ -178,7 +194,17 @@ clears.forEach(element => {
     }
     if (element.dataset.clear === 'backspace') {
         element.addEventListener('click', () => {
-            input.textContent = input.textContent.slice(0, -1);
+            if (Number(input.textContent) < 0) {
+                input.textContent = input.textContent.slice(0, -1);
+                expression.textContent = expression.textContent.slice(0, -2) + ')';
+                if (input.textContent === '-') {
+                    input.textContent = '';
+                    expression.textContent = expression.textContent.slice(0, -3);
+                }
+            } else {
+                input.textContent = input.textContent.slice(0, -1);
+                expression.textContent = expression.textContent.slice(0, -1);
+            }
         });
     }
 });
