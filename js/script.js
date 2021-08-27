@@ -7,6 +7,18 @@ const clears = document.querySelectorAll("[data-clear]");
 
 const digits = 1e10;
 
+const validation = (e) => {
+    if (e.includes('/')) {
+        let index = e.indexOf('/');
+        let secondHalf = e.substring(index + 1, e.length);
+        let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
+        if (secondOperand == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 const getNewExpression = (expression, operator) => {
     let index;
     if (operator === '^') {
@@ -27,8 +39,8 @@ const getNewExpression = (expression, operator) => {
     firstHalf = firstHalf.charAt(firstHalf.length - 1) === ')' ? firstHalf.slice(0, -1) : firstHalf;
     let firstOperand = firstHalf.match(/-?\d*\.{0,1}\d+$/)[0];
     let secondOperand = secondHalf.match(/-?\d*\.{0,1}\d+/)[0];
-    let firstOperandStr = Number(firstOperand) > 0 ? firstOperand : '(' + firstOperand + ')';
-    let secondOperandStr = Number(secondOperand) > 0 ? secondOperand : '(' + secondOperand + ')';
+    let firstOperandStr = Number(firstOperand) >= 0 ? firstOperand : '(' + firstOperand + ')';
+    let secondOperandStr = Number(secondOperand) >= 0 ? secondOperand : '(' + secondOperand + ')';
     let re = '';
 
     if (operator === '^') {
@@ -51,14 +63,26 @@ const getNewExpression = (expression, operator) => {
 }
 
 const getResult = expression => {
+    if (!validation(expression)) {
+        return 'Error';
+    }
     let newExp = expression;
     let tempExpression = expression.replaceAll('(-', '(');
     if (expression.includes('^')) {
         newExp = getNewExpression(expression, '^');
-    } else if (expression.includes('*')) {
-        newExp = getNewExpression(expression, '*');
-    } else if (expression.includes('/')) {
-        newExp = getNewExpression(expression, '/');
+    } else if (expression.includes('*') || expression.includes('/')) {
+        // make operations in sequence
+        // 9/5*0 -> 0
+        // 9/0*5 -> Error
+        let indexOfMultiplication = expression.includes('*') && expression.indexOf('*');
+        let indexForDivision = expression.includes('/') && expression.indexOf('/');
+        if (indexOfMultiplication > 0 && indexForDivision > 0) {
+            if (indexOfMultiplication < indexForDivision) newExp = getNewExpression(expression, '*');
+            else newExp = getNewExpression(expression, '/');
+        } else {
+            if (indexOfMultiplication > 0) newExp = getNewExpression(expression, '*');
+            else newExp = getNewExpression(expression, '/');
+        }
     } else if (tempExpression.includes('-')) {
         newExp = getNewExpression(expression, '-');
     } else if (expression.includes('+')) {
@@ -86,7 +110,7 @@ numbers.forEach(element => {
                 input.textContent = '0' + element.textContent;
                 expression.textContent += '0' + element.textContent;
             } else if (input.textContent.includes('.')) {
-
+                // make nothing if number already contains dot
             } else {
                 input.textContent += element.textContent;
                 expression.textContent += element.textContent;
@@ -99,7 +123,6 @@ numbers.forEach(element => {
                     expression.textContent = expression.textContent.replace(re, num);
                 } else {
                     let re = new RegExp(input.textContent + '$');
-
                     expression.textContent = expression.textContent.replace(re, '(' + -1 * Number(input.textContent) + ')');
                 }
                 input.textContent = -1 * Number(input.textContent);
