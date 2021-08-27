@@ -30,8 +30,8 @@ const getNewExpression = (expression, operator) => {
     } else if (operator === '+') {
         index = expression.indexOf('+');
     } else if (operator === '-') {
-        let re = new RegExp('[^\\(]-');
-        let tempStr = expression.replace(re, '*#'); // please, don't judge me
+        let re = new RegExp('[^\\(]-'); // select except minus sign of negative numbers
+        let tempStr = expression.replace(re, '*#');
         index = tempStr.indexOf('#');
     }
 
@@ -64,10 +64,14 @@ const getNewExpression = (expression, operator) => {
 }
 
 const getResult = expression => {
+    let newExp = expression;
+    if (expression.charAt(0) === '-') { // second recall this function 10-40+5 will be (-30)+5 instead of -30+5 
+        let number = expression.match(/-?\d*\.{0,1}\d+/)[0];
+        expression = expression.replace(number, '(' + number + ')');
+    }
     if (!validation(expression)) {
         return 'Error';
     }
-    let newExp = expression;
     let tempExpression = expression.replaceAll('(-', '(');
     if (expression.includes('^')) {
         newExp = getNewExpression(expression, '^');
@@ -147,13 +151,17 @@ numbers.forEach(element => {
 operators.forEach(element => {
     if (element.dataset.operator === 'percent') {
         element.addEventListener('click', () => {
-            let re = new RegExp(input.textContent + '$');
-            expression.textContent = expression.textContent.replace(re, Number(input.textContent) / 100);
-            input.textContent = '';
+            if (expression.textContent.length != 0 && input.textContent.length != 0) {
+                let re = new RegExp(input.textContent + '$');
+                expression.textContent = expression.textContent.replace(re, Number(input.textContent) / 100);
+                input.textContent = '';
+            }
         });
     } else if (element.dataset.operator === 'pow2') {
         element.addEventListener('click', () => {
-            if (expression.textContent.length === 0 && input.textContent.length > 0) {
+            if (expression.textContent.length === 0 && input.textContent.length === 0) {
+                // make nothing
+            } else if (expression.textContent.length === 0 && input.textContent.length > 0) {
                 input.textContent = (Math.round(Math.pow(input.textContent, 2) * digits) / digits).toString().slice(0, 10);
             } else {
                 let finalExpression = expression.textContent;
@@ -170,7 +178,9 @@ operators.forEach(element => {
         });
     } else if (element.dataset.operator === 'powx') {
         element.addEventListener('click', () => {
-            if (expression.textContent.length === 0 && input.textContent.length > 0) {
+            if (expression.textContent.length === 0 && input.textContent.length === 0) {
+                // make nothing
+            } else if (expression.textContent.length === 0 && input.textContent.length > 0) {
                 expression.textContent = input.textContent + '^';
                 input.textContent = '';
             } else {
@@ -180,21 +190,25 @@ operators.forEach(element => {
         });
     } else if (element.dataset.operator === 'sqrt') {
         element.addEventListener('click', () => {
-            if (expression.textContent.length === 0 && input.textContent.length > 0) {
-                if (Number(input.textContent) < 0) expression.textContent = '(' + input.textContent + ')';
-                else expression.textContent = input.textContent;
-                input.textContent = '';
+            if (expression.textContent.length === 0 && input.textContent.length === 0) {
+                // make nothing
+            } else {
+                if (expression.textContent.length === 0 && input.textContent.length > 0) {
+                    if (Number(input.textContent) < 0) expression.textContent = '(' + input.textContent + ')';
+                    else expression.textContent = input.textContent;
+                    input.textContent = '';
+                }
+                let finalExpression = expression.textContent;
+                let finalChar = finalExpression.charAt(finalExpression.length - 1);
+                if (!isFinite(finalChar) && finalChar != ')') {
+                    expression.textContent = expression.textContent.slice(0, -1);
+                    finalExpression = finalExpression.slice(0, -1);
+                }
+                expression.textContent = '';
+                let sqrt = getResult(finalExpression);
+                let result = (Math.round(Math.pow(sqrt, 1 / 2) * digits) / digits).toString().slice(0, 10);
+                input.textContent = Number(sqrt) < 0 ? 'Error' : result;
             }
-            let finalExpression = expression.textContent;
-            let finalChar = finalExpression.charAt(finalExpression.length - 1);
-            if (!isFinite(finalChar) && finalChar != ')') {
-                expression.textContent = expression.textContent.slice(0, -1);
-                finalExpression = finalExpression.slice(0, -1);
-            }
-            expression.textContent = '';
-            let sqrt = getResult(finalExpression);
-            let result = (Math.round(Math.pow(sqrt, 1 / 2) * digits) / digits).toString().slice(0, 10);
-            input.textContent = Number(sqrt) < 0 ? 'Error' : result;
         });
     } else if (element.dataset.operator === 'equals') {
         element.addEventListener('click', () => {
@@ -266,5 +280,42 @@ clears.forEach(element => {
                 expression.textContent = expression.textContent.slice(0, -1);
             }
         });
+    }
+});
+
+// trigger button click on keydown event
+window.addEventListener('keydown', function (event) {
+    if (event.code === 'Enter' || event.code === 'NumpadEnter' || event.key === '=') {
+        document.querySelector('#equals').click();
+    } else if (event.key === '0') {
+        document.querySelector('#zero').click();
+    } else if (event.key === '1') {
+        document.querySelector('#one').click();
+    } else if (event.key === '2') {
+        document.querySelector('#two').click();
+    } else if (event.key === '3') {
+        document.querySelector('#three').click();
+    } else if (event.key === '4') {
+        document.querySelector('#four').click();
+    } else if (event.key === '5') {
+        document.querySelector('#five').click();
+    } else if (event.key === '6') {
+        document.querySelector('#six').click();
+    } else if (event.key === '7') {
+        document.querySelector('#seven').click();
+    } else if (event.key === '8') {
+        document.querySelector('#eight').click();
+    } else if (event.key === '9') {
+        document.querySelector('#nine').click();
+    } else if (event.code === 'Backspace') {
+        document.querySelector('#backspace').click();
+    } else if (event.code === 'NumpadAdd' || event.key === '+') {
+        document.querySelector('#plus').click();
+    } else if (event.code === 'NumpadSubtract' || event.code === 'Minus' || event.key === '-') {
+        document.querySelector('#minus').click();
+    } else if (event.code === 'NumpadMultiply' || event.key === '*') {
+        document.querySelector('#multiply').click();
+    } else if (event.code === 'NumpadDivide' || event.code === 'Slash') {
+        document.querySelector('#divide').click();
     }
 });
