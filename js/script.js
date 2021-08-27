@@ -92,16 +92,18 @@ numbers.forEach(element => {
                 expression.textContent += element.textContent;
             }
         } else if (element.dataset.number === 'plusminus') {
-            if (Number(input.textContent) < 0) {
-                let re = new RegExp('\\(' + input.textContent + '\\)$');
-                let num = -1 * Number(input.textContent);
-                expression.textContent = expression.textContent.replace(re, num);
-            } else {
-                let re = new RegExp(input.textContent + '$');
+            if (Number(input.textContent) != 0) {
+                if (Number(input.textContent) < 0) {
+                    let re = new RegExp('\\(' + input.textContent + '\\)$');
+                    let num = -1 * Number(input.textContent);
+                    expression.textContent = expression.textContent.replace(re, num);
+                } else {
+                    let re = new RegExp(input.textContent + '$');
 
-                expression.textContent = expression.textContent.replace(re, '(' + -1 * Number(input.textContent) + ')');
+                    expression.textContent = expression.textContent.replace(re, '(' + -1 * Number(input.textContent) + ')');
+                }
+                input.textContent = -1 * Number(input.textContent);
             }
-            input.textContent = -1 * Number(input.textContent);
         } else {
             if (Number(input.textContent) === 0 && !input.textContent.includes('.')) {
                 input.textContent = element.textContent;
