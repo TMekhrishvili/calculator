@@ -30,8 +30,9 @@ const getNewExpression = (expression, operator) => {
     } else if (operator === '+') {
         index = expression.indexOf('+');
     } else if (operator === '-') {
-        let tempStr = expression.replaceAll('(-', '('); // not select negative sign
-        index = tempStr.indexOf('-');
+        let re = new RegExp('[^\\(]-');
+        let tempStr = expression.replace(re, '*#'); // please, don't judge me
+        index = tempStr.indexOf('#');
     }
 
     let firstHalf = expression.substring(0, index);
@@ -179,6 +180,11 @@ operators.forEach(element => {
         });
     } else if (element.dataset.operator === 'sqrt') {
         element.addEventListener('click', () => {
+            if (expression.textContent.length === 0 && input.textContent.length > 0) {
+                if (Number(input.textContent) < 0) expression.textContent = '(' + input.textContent + ')';
+                else expression.textContent = input.textContent;
+                input.textContent = '';
+            }
             let finalExpression = expression.textContent;
             let finalChar = finalExpression.charAt(finalExpression.length - 1);
             if (!isFinite(finalChar) && finalChar != ')') {
@@ -239,6 +245,10 @@ clears.forEach(element => {
     }
     if (element.dataset.clear === 'clear') {
         element.addEventListener('click', () => {
+            let re;
+            if (Number(input.textContent) < 0) re = new RegExp('\\(' + input.textContent + '\\)$');
+            else re = new RegExp(input.textContent + '$');
+            expression.textContent = expression.textContent.replace(re, '');
             input.textContent = '';
         });
     }
