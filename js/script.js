@@ -5,7 +5,7 @@ const numbers = document.querySelectorAll("[data-number]");
 const operators = document.querySelectorAll("[data-operator]");
 const clears = document.querySelectorAll("[data-clear]");
 
-let isFinalResult = false;
+const digits = 1e10;
 
 const getNewExpression = (expression, operator) => {
     let index;
@@ -77,10 +77,9 @@ const getResult = expression => {
 
 numbers.forEach(element => {
     element.addEventListener('click', () => {
-        if (isFinalResult) {
+        if (expression.textContent.length === 0 && input.textContent.length > 0) {
             input.textContent = '';
             expression.textContent = '';
-            isFinalResult = false;
         }
         if (element.dataset.number === 'dot') {
             if (input.textContent === '') {
@@ -120,11 +119,6 @@ numbers.forEach(element => {
 });
 
 operators.forEach(element => {
-    if (isFinalResult) {
-        input.textContent = '';
-        expression.textContent = '';
-        isFinalResult = false;
-    }
     if (element.dataset.operator === 'percent') {
         element.addEventListener('click', () => {
             let re = new RegExp(input.textContent + '$');
@@ -133,23 +127,30 @@ operators.forEach(element => {
         });
     } else if (element.dataset.operator === 'pow2') {
         element.addEventListener('click', () => {
-            let finalExpression = expression.textContent;
-            let finalChar = finalExpression.charAt(finalExpression.length - 1);
-            if (!isFinite(finalChar) && finalChar != ')') {
-                expression.textContent = expression.textContent.slice(0, -1);
-                finalExpression = finalExpression.slice(0, -1);
+            if (expression.textContent.length === 0 && input.textContent.length > 0) {
+                input.textContent = (Math.round(Math.pow(input.textContent, 2) * digits) / digits).toString().slice(0, 10);
+            } else {
+                let finalExpression = expression.textContent;
+                let finalChar = finalExpression.charAt(finalExpression.length - 1);
+                if (!isFinite(finalChar) && finalChar != ')') {
+                    expression.textContent = expression.textContent.slice(0, -1);
+                    finalExpression = finalExpression.slice(0, -1);
+                }
+                expression.textContent = '';
+                let pow2 = getResult(finalExpression);
+                let result = (Math.round(Math.pow(pow2, 2) * digits) / digits).toString().slice(0, 10);
+                input.textContent = result;
             }
-            expression.textContent = '';
-            let pow2 = getResult(finalExpression);
-            let digits = 1e10;
-            let result = (Math.round(Math.pow(pow2, 2) * digits) / digits).toString().slice(0, 5);
-            input.textContent = result;
-            isFinalResult = true;
         });
     } else if (element.dataset.operator === 'powx') {
         element.addEventListener('click', () => {
-            expression.textContent += '^';
-            input.textContent = '';
+            if (expression.textContent.length === 0 && input.textContent.length > 0) {
+                expression.textContent = input.textContent + '^';
+                input.textContent = '';
+            } else {
+                expression.textContent += '^';
+                input.textContent = '';
+            }
         });
     } else if (element.dataset.operator === 'sqrt') {
         element.addEventListener('click', () => {
@@ -161,10 +162,8 @@ operators.forEach(element => {
             }
             expression.textContent = '';
             let sqrt = getResult(finalExpression);
-            let digits = 1e10;
-            let result = (Math.round(Math.pow(sqrt, 1 / 2) * digits) / digits).toString().slice(0, 5);
+            let result = (Math.round(Math.pow(sqrt, 1 / 2) * digits) / digits).toString().slice(0, 10);
             input.textContent = Number(sqrt) < 0 ? 'Error' : result;
-            isFinalResult = true;
         });
     } else if (element.dataset.operator === 'equals') {
         element.addEventListener('click', () => {
@@ -176,10 +175,12 @@ operators.forEach(element => {
             }
             expression.textContent = '';
             input.textContent = getResult(finalExpression);
-            isFinalResult = true;
         });
     } else {
         element.addEventListener('click', () => {
+            if (expression.textContent.length === 0 && input.textContent.length > 0) {
+                expression.textContent = input.textContent;
+            }
             if (expression.textContent.length > 0) { // because first char must be numeric
                 let str = expression.textContent;
                 let finalChar = str.charAt(str.length - 1)
