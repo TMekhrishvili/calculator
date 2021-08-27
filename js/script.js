@@ -8,7 +8,7 @@ const clears = document.querySelectorAll("[data-clear]");
 let isFinalResult = false;
 
 const getNewExpression = (expression, operator) => {
-    let index = '';
+    let index;
     if (operator === '^') {
         index = expression.indexOf('^');
     } else if (operator === '*') {
@@ -67,7 +67,9 @@ const getResult = expression => {
         newExp = expression.replace('(', '').replace(')', '');
     }
     if (isFinite(newExp)) {
-        return newExp;
+        let digits = 1e10;
+        let result = (Math.round(newExp * digits) / digits).toString().slice(0, 10);
+        return result;
     } else {
         return getResult(newExp);
     }
@@ -139,7 +141,9 @@ operators.forEach(element => {
             }
             expression.textContent = '';
             let pow2 = getResult(finalExpression);
-            input.textContent = Math.pow(pow2, 2);
+            let digits = 1e10;
+            let result = (Math.round(Math.pow(pow2, 2) * digits) / digits).toString().slice(0, 5);
+            input.textContent = result;
             isFinalResult = true;
         });
     } else if (element.dataset.operator === 'powx') {
@@ -157,7 +161,9 @@ operators.forEach(element => {
             }
             expression.textContent = '';
             let sqrt = getResult(finalExpression);
-            input.textContent = Number(sqrt) < 0 ? 'Error' : Math.pow(sqrt, 1 / 2);
+            let digits = 1e10;
+            let result = (Math.round(Math.pow(sqrt, 1 / 2) * digits) / digits).toString().slice(0, 5);
+            input.textContent = Number(sqrt) < 0 ? 'Error' : result;
             isFinalResult = true;
         });
     } else if (element.dataset.operator === 'equals') {
